@@ -1,0 +1,30 @@
+.app-root {
+  position: relative;
+  min-height: 100vh;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 80px;
+  min-height: 100vh;
+}
+
+.page-enter {
+  animation: pageIn 500ms var(--ease-out) forwards;
+}
+
+.page-exit {
+  opacity: 0;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

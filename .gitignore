@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+env/
+
+# Node
+node_modules/
+dist/
+build/
+.npm/
+
+# macOS
+.DS_Store
+
+# Data & Audio
+/uploads/
+/transcripts/
+/chunks/
+/database/*.db
+
+# Temporary
+test_run.py
+test_pipeline.py
