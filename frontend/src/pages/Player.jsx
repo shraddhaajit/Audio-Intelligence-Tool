@@ -77,13 +77,11 @@ function Player() {
   }
 
   const skip = (amount) => {
-    if (audioRef.current) {
-      let newTime = audioRef.current.currentTime + amount;
-      if (newTime < 0) newTime = 0;
-      if (duration > 0 && newTime > duration) newTime = duration;
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
+    if (!audioRef.current) return;
+    let newTime = audioRef.current.currentTime + amount;
+    if (newTime < 0) newTime = 0;
+    if (duration > 0 && newTime > duration) newTime = duration;
+    audioRef.current.currentTime = newTime;
   }
 
   const changeSpeed = (newSpeed) => {

@@ -21,7 +21,7 @@ TRANSCRIPTS_DIR = PROJECT_ROOT / "transcripts"
 _whisper_model = None
 
 
-def _load_model(model_name: str = "medium"):
+def _load_model(model_name: str = "base"):
     """Load the faster-whisper model (lazy singleton)."""
     global _whisper_model
     if _whisper_model is None:
@@ -29,13 +29,14 @@ def _load_model(model_name: str = "medium"):
         logger.info(f"Loading faster-whisper '{model_name}' model (INT8 CPU)...")
         start = time.time()
         # compute_type="int8" massively speeds up CPU execution and lowers RAM usage
-        _whisper_model = WhisperModel(model_name, device="cpu", compute_type="int8")
+        # cpu_threads=4 prevents severe thread-thrashing on Windows CPUs
+        _whisper_model = WhisperModel(model_name, device="cpu", compute_type="int8", cpu_threads=4)
         elapsed = time.time() - start
         logger.info(f"Faster-whisper model loaded in {elapsed:.1f}s")
     return _whisper_model
 
 
-def transcribe(wav_path: str, audio_id: str, model_name: str = "medium") -> dict:
+def transcribe(wav_path: str, audio_id: str, model_name: str = "base") -> dict:
     """
     Transcribe a WAV file using faster-whisper.
     

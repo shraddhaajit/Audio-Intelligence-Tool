@@ -185,7 +185,7 @@ async def upload_audio(
 
 
 @app.get("/status")
-async def get_status(audio_id: str):
+def get_status(audio_id: str):
     """Get processing status for an audio session."""
     session = get_session(audio_id)
     if session is None:
@@ -194,13 +194,13 @@ async def get_status(audio_id: str):
 
 
 @app.get("/sessions")
-async def list_sessions():
+def list_sessions():
     """List all audio sessions."""
     return get_all_sessions()
 
 
 @app.get("/transcript/{audio_id}")
-async def get_transcript(audio_id: str):
+def get_transcript(audio_id: str):
     """Get the full transcript for an audio session."""
     session = get_session(audio_id)
     if session is None:
@@ -220,7 +220,7 @@ async def get_transcript(audio_id: str):
 
 
 @app.get("/chunks/{audio_id}")
-async def get_chunks(audio_id: str):
+def get_chunks(audio_id: str):
     """
     Get chunks for an audio session.
     This is the endpoint Person 2's retrieval layer calls.

@@ -84,6 +84,11 @@ function Upload() {
               setIsProcessing(false)
               clearInterval(intervalId)
             }
+          } else {
+            // Stop polling if the session is not found or other errors
+            setIsProcessing(false)
+            clearInterval(intervalId)
+            setError("Failed to fetch status or session deleted.")
           }
         } catch (err) {
           console.error("Failed to fetch status", err)
