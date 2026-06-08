@@ -21,22 +21,23 @@ TRANSCRIPTS_DIR = PROJECT_ROOT / "transcripts"
 _whisper_model = None
 
 
-def _load_model(model_name: str = "small"):
-    """Load the Whisper model (lazy singleton)."""
+def _load_model(model_name: str = "medium"):
+    """Load the faster-whisper model (lazy singleton)."""
     global _whisper_model
     if _whisper_model is None:
-        import whisper
-        logger.info(f"Loading Whisper '{model_name}' model...")
+        from faster_whisper import WhisperModel
+        logger.info(f"Loading faster-whisper '{model_name}' model (INT8 CPU)...")
         start = time.time()
-        _whisper_model = whisper.load_model(model_name)
+        # compute_type="int8" massively speeds up CPU execution and lowers RAM usage
+        _whisper_model = WhisperModel(model_name, device="cpu", compute_type="int8")
         elapsed = time.time() - start
-        logger.info(f"Whisper model loaded in {elapsed:.1f}s")
+        logger.info(f"Faster-whisper model loaded in {elapsed:.1f}s")
     return _whisper_model
 
 
 def transcribe(wav_path: str, audio_id: str, model_name: str = "medium") -> dict:
     """
-    Transcribe a WAV file using Whisper.
+    Transcribe a WAV file using faster-whisper.
     
     Args:
         wav_path: Path to the 16kHz mono WAV file
@@ -46,42 +47,41 @@ def transcribe(wav_path: str, audio_id: str, model_name: str = "medium") -> dict
     Returns:
         dict with audio_id, transcript_path, segments, full_text, duration
     """
-    import whisper
-
     model = _load_model(model_name)
     
-    logger.info(f"Transcribing: {wav_path}")
+    logger.info(f"Transcribing (faster-whisper): {wav_path}")
     start = time.time()
     
-    # Transcribe with word timestamps for better segmentation
-    result = model.transcribe(
+    # faster-whisper returns a generator for segments
+    segments_generator, info = model.transcribe(
         wav_path,
+        beam_size=5,
         language="en",
-        verbose=False,
-        fp16=False,  # Use FP32 for CPU compatibility on 8GB RAM
+        word_timestamps=True,
     )
     
+    segments = []
+    full_text_parts = []
+    
+    for seg in segments_generator:
+        segments.append({
+            "id": seg.id,
+            "text": seg.text.strip(),
+            "start": round(seg.start, 2),
+            "end": round(seg.end, 2),
+        })
+        full_text_parts.append(seg.text.strip())
+        
     elapsed = time.time() - start
     logger.info(f"Transcription completed in {elapsed:.1f}s")
 
-    # Extract segments with timestamps
-    segments = []
-    for seg in result.get("segments", []):
-        segments.append({
-            "id": seg["id"],
-            "text": seg["text"].strip(),
-            "start": round(seg["start"], 2),
-            "end": round(seg["end"], 2),
-        })
-
-    # Calculate total duration
-    duration = segments[-1]["end"] if segments else 0.0
+    duration = info.duration
 
     # Build transcript output
     transcript_data = {
         "audio_id": audio_id,
-        "full_text": result["text"].strip(),
-        "language": result.get("language", "en"),
+        "full_text": " ".join(full_text_parts),
+        "language": info.language,
         "duration_seconds": duration,
         "segment_count": len(segments),
         "segments": segments,
@@ -101,7 +101,7 @@ def transcribe(wav_path: str, audio_id: str, model_name: str = "medium") -> dict
         "audio_id": audio_id,
         "transcript_path": str(transcript_path),
         "segments": segments,
-        "full_text": result["text"].strip(),
+        "full_text": transcript_data["full_text"],
         "duration_seconds": duration,
         "segment_count": len(segments),
     }
