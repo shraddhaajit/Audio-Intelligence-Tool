@@ -7,7 +7,7 @@ uvicorn[standard]==0.30.6
 python-multipart==0.0.9
 
 # Audio Processing
-openai-whisper==20231117
+faster-whisper==1.0.3
 yt-dlp==2024.8.6
 pydub==0.25.1
 

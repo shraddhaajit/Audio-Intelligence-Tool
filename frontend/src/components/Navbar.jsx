@@ -20,10 +20,7 @@ function Navbar() {
   const links = [
     { to: '/', label: 'Home' },
     { to: '/upload', label: 'Upload' },
-    { to: '/sessions', label: 'Sessions' },
-    { to: '/transcript', label: 'Transcript' },
-    { to: '/player', label: 'Player' },
-    { to: '/chunks', label: 'Chunks' },
+    { to: '/sessions', label: 'Library' },
   ]
 
   return (

@@ -108,6 +108,8 @@ def process_youtube_url(url: str) -> dict:
         "--audio-quality", "0",
         "--output", output_template,
         "--no-playlist",
+        # Use a mobile client to often bypass YouTube's rate limiting without needing cookies
+        "--extractor-args", "youtube:player_client=android",
         url,
     ]
     logger.info(f"Downloading from YouTube: {url}")
@@ -132,7 +134,7 @@ def process_youtube_url(url: str) -> dict:
         wav_path = downloaded
 
     # Try to get the video title
-    title_cmd = ["yt-dlp", "--get-title", "--no-playlist", url]
+    title_cmd = ["yt-dlp", "--get-title", "--no-playlist", "--extractor-args", "youtube:player_client=android", url]
     title_result = subprocess.run(title_cmd, capture_output=True, text=True)
     title = title_result.stdout.strip() if title_result.returncode == 0 else url
 
@@ -190,10 +192,15 @@ def process_podcast_url(url: str) -> dict:
     elif "apple" in url.lower():
         source_type = "apple_podcast"
 
+    # Try to get the podcast title
+    title_cmd = ["yt-dlp", "--get-title", "--no-playlist", url]
+    title_result = subprocess.run(title_cmd, capture_output=True, text=True)
+    title = title_result.stdout.strip() if title_result.returncode == 0 else url
+
     return {
         "audio_id": audio_id,
         "wav_path": str(wav_path),
-        "original_filename": url,
+        "original_filename": title,
         "source_type": source_type,
         "source_url": url,
     }

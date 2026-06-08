@@ -59,10 +59,18 @@ function Transcript() {
     <div className="transcript-page">
       <div className="transcript-page__inner">
         <div className="transcript-page__header slide-up">
-          <p className="section-overline">Transcript</p>
-          <h1 className="section-title">
-            Session {audioId.substring(0, 8)}
-          </h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p className="section-overline">Transcript</p>
+              <h1 className="section-title">
+                Session {audioId.substring(0, 8)}
+              </h1>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <Link to={`/player/${audioId}`} className="btn btn--primary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Open Player</Link>
+              <Link to={`/chunks/${audioId}`} className="btn btn--secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>View Chunks</Link>
+            </div>
+          </div>
         </div>
 
         {loading && <p style={{ color: 'var(--text-muted)' }}>Loading transcript...</p>}

@@ -34,7 +34,7 @@ def _load_model(model_name: str = "small"):
     return _whisper_model
 
 
-def transcribe(wav_path: str, audio_id: str, model_name: str = "small") -> dict:
+def transcribe(wav_path: str, audio_id: str, model_name: str = "medium") -> dict:
     """
     Transcribe a WAV file using Whisper.
     

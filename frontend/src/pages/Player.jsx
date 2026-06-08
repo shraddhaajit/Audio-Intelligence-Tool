@@ -78,7 +78,11 @@ function Player() {
 
   const skip = (amount) => {
     if (audioRef.current) {
-      audioRef.current.currentTime += amount;
+      let newTime = audioRef.current.currentTime + amount;
+      if (newTime < 0) newTime = 0;
+      if (duration > 0 && newTime > duration) newTime = duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
   }
 
@@ -162,10 +166,10 @@ function Player() {
 
             {/* Controls */}
             <div className="player-controls">
-              <button className="player-btn player-btn--sm" onClick={() => skip(-15)} aria-label="Rewind 15 seconds">
+              <button className="player-btn player-btn--sm" onClick={() => skip(-5)} aria-label="Rewind 5 seconds">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="currentColor"/>
-                  <text x="9" y="16" fontSize="7" fill="currentColor" fontFamily="sans-serif" fontWeight="700">15</text>
+                  <text x="9" y="16" fontSize="7" fill="currentColor" fontFamily="sans-serif" fontWeight="700">5</text>
                 </svg>
               </button>
 
@@ -186,10 +190,10 @@ function Player() {
                 )}
               </button>
 
-              <button className="player-btn player-btn--sm" onClick={() => skip(15)} aria-label="Forward 15 seconds">
+              <button className="player-btn player-btn--sm" onClick={() => skip(5)} aria-label="Forward 5 seconds">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" fill="currentColor"/>
-                  <text x="9" y="16" fontSize="7" fill="currentColor" fontFamily="sans-serif" fontWeight="700">15</text>
+                  <text x="9" y="16" fontSize="7" fill="currentColor" fontFamily="sans-serif" fontWeight="700">5</text>
                 </svg>
               </button>
             </div>

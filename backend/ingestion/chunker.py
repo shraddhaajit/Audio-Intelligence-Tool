@@ -19,9 +19,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CHUNKS_DIR = PROJECT_ROOT / "chunks"
 
 # Chunking parameters
-TARGET_CHUNK_WORDS = 450  # Target ~400-500 words per chunk
-MAX_CHUNK_WORDS = 500
-OVERLAP_WORDS = 100
+TARGET_CHUNK_WORDS = 150  # Target ~150 words per chunk for better granularity on short audio
+MAX_CHUNK_WORDS = 200
+OVERLAP_WORDS = 30
 
 
 def _format_timestamp(seconds: float) -> str:
