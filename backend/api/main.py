@@ -40,6 +40,13 @@ from backend.database.db import (
     create_session, update_session, get_session, get_all_sessions, init_db
 )
 
+# Insert the ai module into the path
+sys.path.insert(0, str(PROJECT_ROOT / "ai"))
+from retrieval.retrieve import retrieve
+from generation.generator import generate_answer
+from verification.verify import verify
+from pydantic import BaseModel
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 UPLOADS_DIR = PROJECT_ROOT / "uploads"
 TRANSCRIPTS_DIR = PROJECT_ROOT / "transcripts"
@@ -107,6 +114,17 @@ def process_audio(audio_id: str, wav_path: str, source_filename: str):
             audio_id=audio_id,
             source_filename=source_filename,
         )
+        
+        # Trigger AI Index Rebuild
+        try:
+            from ai.retrieval.chroma_store import build_chroma_index
+            from ai.retrieval.bm25_store import build_bm25_index
+            build_chroma_index()
+            build_bm25_index()
+            logger.info(f"[{audio_id}] AI indexes rebuilt successfully")
+        except Exception as e:
+            logger.error(f"[{audio_id}] Failed to rebuild AI indexes: {e}")
+
         update_session(
             audio_id,
             status="processed",
@@ -240,6 +258,52 @@ def get_chunks(audio_id: str):
         chunks = json.load(f)
     
     return {"audio_id": audio_id, "chunk_count": len(chunks), "chunks": chunks}
+
+
+class QuestionRequest(BaseModel):
+    question: str
+
+@app.post("/query")
+def query_audio(request: QuestionRequest):
+    question = request.question
+    results = retrieve(question)
+
+    if not results or not results["documents"] or not results["documents"][0]:
+        return {"error": "No matching evidence found"}
+
+    docs = results["documents"][0]
+    metadata = results["metadatas"][0]
+    distances = results["distances"][0] if "distances" in results and results["distances"] else [0.0] * len(docs)
+
+    evidence_text = ""
+    evidence_list = []
+
+    for doc, meta in zip(docs, metadata):
+        evidence_text += doc + "\n\n"
+        evidence_list.append({
+            "text": doc,
+            "timestamp": meta["start"],
+            "end_timestamp": meta.get("end", meta["start"]),
+            "source": meta.get("source", "Unknown"),
+            "audio_id": meta.get("audio_id", "")
+        })
+
+    answer = generate_answer(question, evidence_text)
+    
+    # Check if verify takes distances as an argument
+    try:
+        support, confidence = verify(distances, len(evidence_list))
+    except TypeError:
+        # If verify only takes len(evidence_list)
+        support, confidence = verify(len(evidence_list))
+
+    return {
+        "question": question,
+        "answer": answer,
+        "support": support,
+        "confidence": confidence,
+        "evidence": evidence_list
+    }
 
 
 @app.get("/health")

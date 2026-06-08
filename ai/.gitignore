@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+
+vectordb/
+
+.cache/
+
+*.db
+
+.env
+
+uploads/
