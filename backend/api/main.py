@@ -40,14 +40,15 @@ from backend.database.db import (
     create_session, update_session, get_session, get_all_sessions, init_db
 )
 
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 # Insert the ai module into the path
 sys.path.insert(0, str(PROJECT_ROOT / "ai"))
 from retrieval.retrieve import retrieve
 from generation.generator import generate_answer
 from verification.verify import verify
 from pydantic import BaseModel
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 UPLOADS_DIR = PROJECT_ROOT / "uploads"
 TRANSCRIPTS_DIR = PROJECT_ROOT / "transcripts"
 CHUNKS_DIR = PROJECT_ROOT / "chunks"
@@ -277,8 +278,9 @@ def query_audio(request: QuestionRequest):
 
     evidence_text = ""
     evidence_list = []
+    filtered_distances = []
 
-    for doc, meta in zip(docs, metadata):
+    for doc, meta, dist in zip(docs, metadata, distances):
         evidence_text += doc + "\n\n"
         evidence_list.append({
             "text": doc,
@@ -287,12 +289,21 @@ def query_audio(request: QuestionRequest):
             "source": meta.get("source", "Unknown"),
             "audio_id": meta.get("audio_id", "")
         })
+        filtered_distances.append(dist)
+        
+    if not evidence_list:
+        return {"error": "No matching evidence found"}
 
-    answer = generate_answer(question, evidence_text)
+    try:
+        answer = generate_answer(question, evidence_text)
+    except Exception as e:
+        if "Ollama" in str(e) or "ConnectionError" in str(e) or "connect" in str(e):
+            return {"error": "Ollama is not running. Please install and start Ollama (with the qwen2.5:3b model) to use the AI features."}
+        return {"error": f"AI generation failed: {str(e)}"}
     
     # Check if verify takes distances as an argument
     try:
-        support, confidence = verify(distances, len(evidence_list))
+        support, confidence = verify(filtered_distances, len(evidence_list))
     except TypeError:
         # If verify only takes len(evidence_list)
         support, confidence = verify(len(evidence_list))

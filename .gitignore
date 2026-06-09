@@ -1,8 +1,6 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
 .env
 venv/
 env/
@@ -11,17 +9,18 @@ env/
 node_modules/
 dist/
 build/
-.npm/
-
-# macOS
 .DS_Store
 
-# Data & Audio
+# User Data & Databases
 /uploads/
 /transcripts/
 /chunks/
-/database/*.db
+/database/
+/vectordb/
+*.db
+*.sqlite3
 
-# Temporary
+# Scratch & Temporary Scripts
+scratch_*.py
 test_run.py
 test_pipeline.py

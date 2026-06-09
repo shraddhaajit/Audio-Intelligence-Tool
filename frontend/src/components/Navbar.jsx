@@ -21,6 +21,7 @@ function Navbar() {
     { to: '/', label: 'Home' },
     { to: '/upload', label: 'Upload' },
     { to: '/sessions', label: 'Library' },
+    { to: '/investigate', label: 'Ask AI' },
   ]
 
   return (

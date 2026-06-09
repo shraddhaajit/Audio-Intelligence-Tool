@@ -2,8 +2,10 @@ import chromadb
 import json
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 client = chromadb.PersistentClient(
-    path="vectordb"
+    path=str(PROJECT_ROOT / "vectordb")
 )
 
 collection = client.get_or_create_collection(

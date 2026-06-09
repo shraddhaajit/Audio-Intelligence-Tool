@@ -7,6 +7,7 @@ import Sessions from './pages/Sessions'
 import Transcript from './pages/Transcript'
 import Player from './pages/Player'
 import Chunks from './pages/Chunks'
+import Investigate from './pages/Investigate'
 import './App.css'
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/player/:audioId" element={<Player />} />
           <Route path="/chunks" element={<Chunks />} />
           <Route path="/chunks/:audioId" element={<Chunks />} />
+          <Route path="/investigate" element={<Investigate />} />
         </Routes>
       </main>
     </div>

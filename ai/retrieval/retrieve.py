@@ -1,11 +1,14 @@
 import chromadb
+from pathlib import Path
 from retrieval.bm25_store import bm25_search
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
 client = chromadb.PersistentClient(
-    path="vectordb"
+    path=str(PROJECT_ROOT / "vectordb")
 )
 
-collection = client.get_collection(
+collection = client.get_or_create_collection(
     "audio_chunks"
 )
 
